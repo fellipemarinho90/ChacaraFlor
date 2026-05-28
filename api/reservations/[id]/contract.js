@@ -23,7 +23,6 @@ module.exports = async (req, res) => {
       return res.status(404).json({ message: "Reserva nao encontrada." });
     }
 
-    // Vercel: GET retorna o arquivo DOCX para download
     if (req.method === "GET") {
       const buffer = await generateContract(reservation);
       const safeName = reservation.clientName.replace(/[\\/:*?"<>|]/g, "_");
@@ -39,20 +38,11 @@ module.exports = async (req, res) => {
       return res.status(200).send(buffer);
     }
 
-    // POST mantido para compatibilidade com servidor local
     if (req.method === "POST") {
-      const buffer = await generateContract(reservation);
-      const safeName = reservation.clientName.replace(/[\\/:*?"<>|]/g, "_");
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="CONTRATO DE LOCACAO - ${safeName}.docx"`
-      );
-      res.setHeader("Content-Length", buffer.length);
-      return res.status(200).send(buffer);
+      return res.status(200).json({
+        message: "Contrato gerado com sucesso.",
+        downloadUrl: `/api/reservations/${id}/contract`,
+      });
     }
 
     return res.status(405).json({ message: "Metodo nao permitido." });

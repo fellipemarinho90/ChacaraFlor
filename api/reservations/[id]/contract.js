@@ -1,16 +1,18 @@
 const { supabase } = require("../../../lib/supabase");
+const { generateContract } = require("../../../lib/contract-generator");
 const { corsHeaders, handleOptions } = require("../../../lib/reservations");
 
 module.exports = async (req, res) => {
-  if (handleOptions(req, res, "POST, OPTIONS")) return;
+  corsHeaders(res);
+  if (req.method === "OPTIONS") return res.status(200).end();
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Metodo nao permitido." });
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(400).json({ message: "ID da reserva nao informado." });
   }
 
   try {
-    const { id } = req.query;
-
     const { data: reservation, error } = await supabase
       .from("reservations")
       .select("*")
@@ -21,15 +23,39 @@ module.exports = async (req, res) => {
       return res.status(404).json({ message: "Reserva nao encontrada." });
     }
 
-    // A geracao de contrato com template DOCX + Word COM
-    // so funciona no ambiente local (Windows + Word instalado).
-    // No Vercel, esta funcionalidade sera desativada.
-    // Para gerar contratos, use o servidor local (node server.js).
-    return res.status(501).json({
-      message:
-        "Geracao de contrato disponivel apenas no ambiente local. " +
-        "Use o servidor local (node server.js) para gerar contratos.",
-    });
+    // Vercel: GET retorna o arquivo DOCX para download
+    if (req.method === "GET") {
+      const buffer = await generateContract(reservation);
+      const safeName = reservation.clientName.replace(/[\\/:*?"<>|]/g, "_");
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="CONTRATO DE LOCACAO - ${safeName}.docx"`
+      );
+      res.setHeader("Content-Length", buffer.length);
+      return res.status(200).send(buffer);
+    }
+
+    // POST mantido para compatibilidade com servidor local
+    if (req.method === "POST") {
+      const buffer = await generateContract(reservation);
+      const safeName = reservation.clientName.replace(/[\\/:*?"<>|]/g, "_");
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="CONTRATO DE LOCACAO - ${safeName}.docx"`
+      );
+      res.setHeader("Content-Length", buffer.length);
+      return res.status(200).send(buffer);
+    }
+
+    return res.status(405).json({ message: "Metodo nao permitido." });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

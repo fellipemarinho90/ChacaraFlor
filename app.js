@@ -334,8 +334,31 @@ async function generateContract() {
   if (!id) return;
 
   try {
-    await requestJson(`${apiBase}/${id}/contract`, { method: "POST" });
-    showToast("Contrato gerado com sucesso.");
+    const response = await fetch(`${apiBase}/${id}/contract`, {
+      method: "POST",
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+
+    if (contentType.includes("json")) {
+      const data = await response.json();
+      if (response.ok) {
+        showToast("Contrato gerado com sucesso.");
+      } else {
+        showToast(data.message || "Erro ao gerar contrato.");
+      }
+    } else {
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `CONTRATO DE LOCACAO - ${id}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast("Contrato baixado.");
+    }
   } catch (error) {
     showToast(error.message || "Erro ao gerar contrato.");
   }

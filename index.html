@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flor do Cerrado | Reservas</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">FC</div>
+          <div>
+            <h1>Flor do Cerrado</h1>
+            <p>Reservas da chacara</p>
+          </div>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">Conectando ao servidor...</div>
+
+        <nav class="app-nav" aria-label="Navegacao principal">
+          <button class="nav-button active" data-view="month" type="button">Mes</button>
+          <button class="nav-button" data-view="year" type="button">Ano</button>
+          <button class="nav-button" data-view="employee" type="button">Pagamentos</button>
+        </nav>
+
+        <section class="panel summary-panel" aria-label="Resumo do mes">
+          <span class="eyebrow">Resumo</span>
+          <div class="summary-grid">
+            <div>
+              <strong id="totalReservations">0</strong>
+              <span>reservas</span>
+            </div>
+            <div>
+              <strong id="receivedRevenue">R$ 0</strong>
+              <span>valor recebido</span>
+            </div>
+            <div>
+              <strong id="monthRevenue">R$ 0</strong>
+              <span>previsto</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span class="eyebrow">Nova reserva</span>
+            <button class="icon-button" id="clearFormButton" type="button" title="Limpar formulario">L</button>
+          </div>
+
+          <form id="reservationForm">
+            <input type="hidden" id="reservationId">
+
+             <label>
+                Cliente
+                <input id="clientName" type="text" placeholder="Nome do cliente" required>
+             </label>
+             
+              <label>
+                CPF
+                 <input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14">
+              </label>
+
+              <label>
+                E-mail
+                <input id="email" type="email" placeholder="cliente@email.com">
+              </label>
+
+             <label>
+               Telefone
+              <input id="phone" type="tel" placeholder="(00) 00000-0000">
+            </label>
+
+            <div class="date-row">
+              <label>
+                Data inicial
+                <input id="eventDate" type="date" required>
+              </label>
+              <label>
+                Data final
+                <input id="endDate" type="date">
+              </label>
+            </div>
+
+            <label>
+              Tipo de evento
+              <select id="eventType">
+                <option>Confraternizacao</option>
+                <option>Aniversario</option>
+                <option>Casamento</option>
+                <option>Corporativo</option>
+                <option>Outro</option>
+              </select>
+            </label>
+
+            <label>
+              Status
+              <select id="status">
+                <option value="pre-reserva">Pre-reserva</option>
+                <option value="reservado" selected>Reservado</option>
+                <option value="pago">Pago</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </label>
+
+             <label>
+               Valor total
+               <input id="totalValue" type="number" min="0" step="0.01" placeholder="0,00">
+             </label>
+
+
+            <section class="payment-box" aria-label="Fluxo de pagamento">
+              <div class="panel-header">
+                <span class="eyebrow">Pagamentos</span>
+                <button class="today-button" id="addPaymentButton" type="button">Adicionar</button>
+              </div>
+
+              <div class="payments-list" id="paymentsList"></div>
+            </section>
+
+            <label>
+              Observacoes
+              <textarea id="notes" rows="4" placeholder="Itens combinados, horarios, necessidades do evento..."></textarea>
+            </label>
+
+            <div class="form-actions">
+              <button class="secondary-button" id="deleteButton" type="button" hidden>Excluir</button>
+              <button class="primary-button" type="submit">Salvar reserva</button>
+              <button class="secondary-button" id="generateContractButton" type="button" hidden>Gerar Contrato</button>
+            </div>
+          </form>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="view-panel active" id="monthView">
+          <header class="topbar">
+            <div>
+              <span class="eyebrow">Calendario</span>
+              <h2 id="monthTitle">Mes</h2>
+            </div>
+            <div class="calendar-controls">
+              <button class="icon-button" id="previousMonth" type="button" title="Mes anterior">&lt;</button>
+              <button class="today-button" id="todayButton" type="button">Hoje</button>
+              <button class="icon-button" id="nextMonth" type="button" title="Proximo mes">&gt;</button>
+            </div>
+          </header>
+
+          <section class="calendar-card" aria-label="Calendario de reservas">
+            <div class="weekdays">
+              <span>Dom</span>
+              <span>Seg</span>
+              <span>Ter</span>
+              <span>Qua</span>
+              <span>Qui</span>
+              <span>Sex</span>
+              <span>Sab</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </section>
+
+          <section class="events-section">
+            <div class="section-header">
+              <div>
+                <span class="eyebrow">Agenda</span>
+                <h3>Eventos do mes</h3>
+              </div>
+              <div class="filters" role="group" aria-label="Filtrar status">
+                <button class="filter-button active" data-filter="todos" type="button">Todos</button>
+                <button class="filter-button" data-filter="reservado" type="button">Reservados</button>
+                <button class="filter-button" data-filter="pago" type="button">Pagos</button>
+              </div>
+            </div>
+            <div class="events-list" id="eventsList"></div>
+          </section>
+        </section>
+
+        <section class="view-panel" id="yearView">
+          <header class="topbar">
+            <div>
+              <span class="eyebrow">Dashboard anual</span>
+              <h2 id="yearTitle">Ano</h2>
+            </div>
+            <div class="calendar-controls">
+              <button class="icon-button" id="previousYear" type="button" title="Ano anterior">&lt;</button>
+              <button class="today-button" id="currentYearButton" type="button">Ano atual</button>
+              <button class="icon-button" id="nextYear" type="button" title="Proximo ano">&gt;</button>
+            </div>
+          </header>
+
+          <section class="year-summary-grid">
+            <div class="metric-card">
+              <strong id="yearEventsTotal">0</strong>
+              <span>eventos no ano</span>
+            </div>
+            <div class="metric-card">
+              <strong id="yearOccupiedDays">0</strong>
+              <span>dias ocupados</span>
+            </div>
+            <div class="metric-card">
+              <strong id="yearRevenue">R$ 0</strong>
+              <span>receita prevista</span>
+            </div>
+          </section>
+
+          <section class="search-section">
+            <div class="section-header">
+              <div>
+                <span class="eyebrow">Busca</span>
+                <h3>Pesquisar cliente</h3>
+              </div>
+            </div>
+            <div class="search-bar">
+              <label>
+                Nome do cliente
+                <input id="clientSearch" type="text" placeholder="Digite o nome do cliente">
+              </label>
+              <button class="primary-button compact" id="clientSearchButton" type="button">Buscar</button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+          </section>
+
+          <section class="year-calendar" id="yearCalendar"></section>
+        </section>
+
+        <section class="view-panel" id="employeeView">
+          <header class="topbar">
+            <div>
+              <span class="eyebrow">Pagamento interno</span>
+              <h2>Funcionarios</h2>
+            </div>
+          </header>
+
+          <section class="events-section">
+            <div class="section-header">
+              <div>
+                <span class="eyebrow">Configuracao</span>
+                <h3>Valor por evento</h3>
+              </div>
+              <button class="primary-button compact" id="saveEmployeeRateButton" type="button">Salvar valor</button>
+            </div>
+
+            <div class="employee-config">
+              <label>
+                Valor pago ao funcionario por evento
+                <input id="employeeRate" type="number" min="0" step="0.01" placeholder="260,00">
+              </label>
+              <label>
+                Mes de calculo
+                <input id="employeeMonth" type="month">
+              </label>
+            </div>
+          </section>
+
+          <section class="year-summary-grid">
+            <div class="metric-card">
+              <strong id="employeeEventsCount">0</strong>
+              <span>eventos confirmados</span>
+            </div>
+            <div class="metric-card">
+              <strong id="employeeRateDisplay">R$ 0</strong>
+              <span>valor por evento</span>
+            </div>
+            <div class="metric-card">
+              <strong id="employeeTotalDue">R$ 0</strong>
+              <span>total a pagar</span>
+            </div>
+          </section>
+
+          <section class="events-section">
+            <div class="section-header">
+              <div>
+                <span class="eyebrow">Detalhe</span>
+                <h3>Eventos considerados</h3>
+              </div>
+            </div>
+            <div class="events-list" id="employeeEventsList"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -464,6 +464,45 @@ function Handle-SettingsApi($Stream, $Request) {
   Send-Json $Stream 405 @{ message = "Metodo nao permitido." }
 }
 
+function Handle-AvailabilityApi($Stream, $Request) {
+  if ($Request.Method -ne "GET") {
+    Send-Json $Stream 405 @{ message = "Metodo nao permitido." }
+    return
+  }
+
+  $reservations = @(Get-Reservations)
+  $filtered = $reservations | Where-Object { @("cancelado", "orcamento") -notcontains $_.status }
+
+  $blockedSet = @{}
+  foreach ($r in $filtered) {
+    $d = [datetime]::ParseExact($r.eventDate, "yyyy-MM-dd", $null)
+    $end = if ([string]::IsNullOrWhiteSpace($r.endDate)) { $r.eventDate } else { $r.endDate }
+    $e = [datetime]::ParseExact($end, "yyyy-MM-dd", $null)
+    while ($d -le $e) {
+      $key = Get-DateKey $d
+      if (-not $blockedSet.ContainsKey($key)) { $blockedSet[$key] = @() }
+      if ($blockedSet[$key].Count -lt 2) { $blockedSet[$key] += $r.clientName }
+      $d = $d.AddDays(1)
+    }
+  }
+
+  $blockedDates = @($blockedSet.Keys | Sort-Object)
+  $reservationsList = $filtered | ForEach-Object {
+    [ordered]@{
+      clientName = $_.clientName
+      eventDate = $_.eventDate
+      endDate = if ([string]::IsNullOrWhiteSpace($_.endDate)) { $_.eventDate } else { $_.endDate }
+      status = $_.status
+    }
+  }
+
+  Send-Json $Stream 200 @{
+    period = [ordered]@{ start = "1900-01-01"; end = "2100-12-31" }
+    blockedDates = $blockedDates
+    reservations = @($reservationsList)
+  }
+}
+
 function Handle-StaticRequest($Stream, $Request) {
   $relativePath = if ($Request.Path -eq "/") { "index.html" } else { $Request.Path.TrimStart("/") }
   $filePath = [System.IO.Path]::GetFullPath((Join-Path $Root $relativePath))
@@ -623,7 +662,9 @@ while ($true) {
     $stream = $client.GetStream()
     $request = Read-HttpRequest $stream
 
-    if ($request.Path.StartsWith("/api/settings")) {
+    if ($request.Path.StartsWith("/api/availability")) {
+      Handle-AvailabilityApi $stream $request
+    } elseif ($request.Path.StartsWith("/api/settings")) {
       Handle-SettingsApi $stream $request
     } elseif ($request.Path.StartsWith("/api/reservations")) {
       Handle-ApiRequest $stream $request

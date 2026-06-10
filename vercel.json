@@ -1,6 +1,19 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/disponibilidade", "destination": "/api/availability" }
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/disponibilidade",
+      "dest": "/api/availability"
+    }
   ]
 }

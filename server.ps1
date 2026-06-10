@@ -662,7 +662,10 @@ while ($true) {
     $stream = $client.GetStream()
     $request = Read-HttpRequest $stream
 
-    if ($request.Path.StartsWith("/api/availability")) {
+    if ($request.Path -eq "/disponibilidade") {
+      $request.Path = "/api/availability"
+      Handle-AvailabilityApi $stream $request
+    } elseif ($request.Path.StartsWith("/api/availability")) {
       Handle-AvailabilityApi $stream $request
     } elseif ($request.Path.StartsWith("/api/settings")) {
       Handle-SettingsApi $stream $request

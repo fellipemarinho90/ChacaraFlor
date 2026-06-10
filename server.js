@@ -63,6 +63,13 @@ async function main() {
         return;
       }
 
+      if (request.url === "/disponibilidade") {
+        request.url = "/api/availability";
+        request.headers.accept = "text/html";
+        await handleAvailabilityApi(request, response);
+        return;
+      }
+
       const token = extractToken(request);
       if (!token || !sessions.has(token)) {
         if (request.url.startsWith("/api/")) {

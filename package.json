@@ -10,9 +10,10 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
-    "docx": "^9.7.1"
+    "docx": "^9.7.1",
+    "jszip": "^3.10.1"
   },
   "devDependencies": {
-    "vercel": "^37.0.0"
+    "vercel": "^54.11.1"
   }
 }

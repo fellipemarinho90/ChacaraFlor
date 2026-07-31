@@ -2,5 +2,10 @@
   "version": 2,
   "rewrites": [
     { "source": "/disponibilidade", "destination": "/api/availability" }
-  ]
+  ],
+  "functions": {
+    "api/reservations/[id]/contract.js": {
+      "includeFiles": "CONTRATO DE LOCAÇAO MODELO.docx"
+    }
+  }
 }

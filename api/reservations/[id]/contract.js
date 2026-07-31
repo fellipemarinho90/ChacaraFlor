@@ -1,5 +1,5 @@
 const { supabase } = require("../../../lib/supabase");
-const { generateContract } = require("../../../lib/contract-generator");
+const { generateContract } = require("../../../lib/contract-local");
 const { corsHeaders, handleOptions } = require("../../../lib/reservations");
 
 module.exports = async (req, res) => {

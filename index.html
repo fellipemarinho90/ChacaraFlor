@@ -20,9 +20,11 @@
 
         <div class="connection-status" id="connectionStatus">Conectando ao servidor...</div>
 
+        <button class="logout-button" id="logoutButton" type="button" title="Sair">Sair</button>
+
         <nav class="app-nav" aria-label="Navegacao principal">
-          <button class="nav-button active" data-view="month" type="button">Mes</button>
-          <button class="nav-button" data-view="year" type="button">Ano</button>
+          <button class="nav-button" data-view="month" type="button">Mes</button>
+          <button class="nav-button active" data-view="year" type="button">Ano</button>
           <button class="nav-button" data-view="employee" type="button">Pagamentos</button>
         </nav>
 
@@ -135,7 +137,7 @@
       </aside>
 
       <main class="workspace">
-        <section class="view-panel active" id="monthView">
+        <section class="view-panel" id="monthView">
           <header class="topbar">
             <div>
               <span class="eyebrow">Calendario</span>
@@ -177,7 +179,7 @@
           </section>
         </section>
 
-        <section class="view-panel" id="yearView">
+        <section class="view-panel active" id="yearView">
           <header class="topbar">
             <div>
               <span class="eyebrow">Dashboard anual</span>

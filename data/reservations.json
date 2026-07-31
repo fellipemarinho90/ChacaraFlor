@@ -1444,31 +1444,74 @@
         "updatedAt":  "2026-05-20T20:54:52.3997861Z"
     },
     {
-        "id":  "dc4f98d1-0230-4102-a0f0-b58e91890470",
-        "clientName":  "Carlos Eduardo",
-        "phone":  "(62) 96666-6666",
-        "eventDate":  "2026-11-15",
-        "endDate":  "2026-11-15",
-        "eventType":  "Casamento",
+        "id":  "ad507acc-6647-4d8e-99c9-7b3140b5e6ac",
+        "clientName":  "RENAN MARCELO MELO SILVA",
+        "cpf":  "751.483.071-53",
+        "email":  "Renans714@gmail.com",
+        "phone":  "62 99826‑7578‬",
+        "eventDate":  "2026-06-27",
+        "endDate":  "2026-06-27",
+        "eventType":  "Confraternizacao",
         "status":  "reservado",
-        "totalValue":  6000,
+        "totalValue":  1710,
         "depositValue":  0,
         "payments":  [
                          {
-                             "date":  "2026-11-15",
-                             "value":  3000,
-                             "status":  "pago"
-                         },
-                         {
-                             "date":  "2026-12-15",
-                             "value":  3000,
+                             "date":  "2026-06-08",
+                             "value":  1710,
                              "status":  "pendente"
                          }
                      ],
         "notes":  "",
-        "cpf":  "555.666.777-88",
-        "paymentMethod":  "Pix",
-        "createdAt":  "2026-05-22T13:54:27.4981998Z",
-        "updatedAt":  "2026-05-22T13:54:27.5041961Z"
+        "createdAt":  "2026-06-08T18:09:19.4482717Z",
+        "updatedAt":  "2026-06-08T18:09:19.4552677Z"
+    },
+    {
+        "id":  "8dc30afd-2d1c-464c-8844-b7bb37955678",
+        "clientName":  "MARIO DELFINO ALVES BANDEIRA JUNIOR",
+        "cpf":  "896.189.041-72",
+        "email":  "",
+        "phone":  "62 99902‑2013",
+        "eventDate":  "2026-11-14",
+        "endDate":  "2026-11-14",
+        "eventType":  "Confraternizacao",
+        "status":  "reservado",
+        "totalValue":  1900,
+        "depositValue":  0,
+        "payments":  [
+                         {
+                             "date":  "2026-06-12",
+                             "value":  500,
+                             "status":  "pendente"
+                         },
+                         {
+                             "date":  "2026-07-12",
+                             "value":  280,
+                             "status":  "pendente"
+                         },
+                         {
+                             "date":  "2026-08-12",
+                             "value":  280,
+                             "status":  "pendente"
+                         },
+                         {
+                             "date":  "2026-09-12",
+                             "value":  280,
+                             "status":  "pendente"
+                         },
+                         {
+                             "date":  "2026-10-12",
+                             "value":  280,
+                             "status":  "pendente"
+                         },
+                         {
+                             "date":  "2026-11-10",
+                             "value":  280,
+                             "status":  "pendente"
+                         }
+                     ],
+        "notes":  "",
+        "createdAt":  "2026-06-11T15:28:59.9197935Z",
+        "updatedAt":  "2026-06-11T15:31:30.4647212Z"
     }
 ]

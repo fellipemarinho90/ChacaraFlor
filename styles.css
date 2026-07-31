@@ -111,6 +111,27 @@ button {
   font-weight: 800;
 }
 
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  width: fit-content;
+  padding: 0 16px;
+  border: 1px solid rgba(184, 74, 58, 0.35);
+  border-radius: 999px;
+  background: rgba(184, 74, 58, 0.08);
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  align-self: start;
+}
+
+.logout-button:hover {
+  background: rgba(184, 74, 58, 0.16);
+}
+
 .connection-status.offline {
   border-color: rgba(184, 74, 58, 0.34);
   background: rgba(184, 74, 58, 0.08);

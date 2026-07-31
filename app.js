@@ -1,3 +1,18 @@
+// Auth: read token from URL if present and set cookie for static assets
+const urlParams = new URLSearchParams(window.location.search);
+const urlToken = urlParams.get("token");
+if (urlToken) {
+  sessionStorage.setItem("auth_token", urlToken);
+  document.cookie = `session=${encodeURIComponent(urlToken)}; path=/; max-age=86400; SameSite=Lax`;
+  const url = new URL(window.location);
+  url.searchParams.delete("token");
+  window.history.replaceState({}, "", url);
+}
+
+function getAuthToken() {
+  return sessionStorage.getItem("auth_token");
+}
+
 const apiBase = "/api/reservations";
 const settingsApi = "/api/settings";
 
@@ -15,7 +30,7 @@ const state = {
   activeYear: new Date().getFullYear(),
   filter: "todos",
   isOnline: false,
-  activeView: "month",
+  activeView: "year",
   settings: {
     employeeRate: 260,
   },
@@ -68,6 +83,7 @@ const elements = {
   employeeEventsList: document.querySelector("#employeeEventsList"),
   toast: document.querySelector("#toast"),
   connectionStatus: document.querySelector("#connectionStatus"),
+  logoutButton: document.querySelector("#logoutButton"),
   clientSearch: document.querySelector("#clientSearch"),
   clientSearchButton: document.querySelector("#clientSearchButton"),
   searchResults: document.querySelector("#searchResults"),
@@ -119,6 +135,8 @@ function bindEvents() {
   });
 
   elements.clientSearchButton.addEventListener("click", handleClientSearch);
+  elements.logoutButton.addEventListener("click", handleLogout);
+
   elements.clientSearch.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -347,7 +365,12 @@ async function generateContract() {
 
     if (data.downloadUrl) {
       const a = document.createElement("a");
+      const token = getAuthToken();
       a.href = data.downloadUrl;
+      if (token) {
+        const separator = data.downloadUrl.includes("?") ? "&" : "?";
+        a.href += separator + "token=" + encodeURIComponent(token);
+      }
       a.download = "";
       document.body.appendChild(a);
       a.click();
@@ -441,7 +464,7 @@ function renderCalendar() {
     if (dateKey === todayKey) cell.classList.add("today");
 
     const dayReservations = getReservationsForDate(dateKey);
-    if (dayReservations.length > 0) {
+    if (dayReservations.some((r) => r.status !== "cancelado")) {
       cell.classList.add("has-event");
     }
     if (dayReservations.some((r) => (r.payments || []).some((p) => p.status === "pendente"))) {
@@ -583,7 +606,8 @@ function createMiniMonth(year, month) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + index);
     const dateKey = toDateKey(date);
-    const reservations = getReservationsForDate(dateKey).filter((reservation) => reservation.status !== "orcamento");
+    const dayReservations = getReservationsForDate(dateKey).filter((r) => r.status !== "orcamento");
+    const activeReservations = dayReservations.filter((r) => r.status !== "cancelado");
     const button = document.createElement("button");
     button.className = "mini-day";
     button.type = "button";
@@ -591,13 +615,13 @@ function createMiniMonth(year, month) {
 
     if (date.getMonth() !== month) button.classList.add("outside");
     if (dateKey === todayKey) button.classList.add("today");
-    if (reservations.length > 0) button.classList.add("occupied");
-    if (reservations.some((reservation) => reservation.status === "pago")) button.classList.add("paid");
-    if (reservations.some((reservation) => reservation.status === "cancelado")) button.classList.add("cancelled");
-    if (reservations.some((r) => (r.payments || []).some((p) => p.status === "pendente"))) button.classList.add("pending");
+    if (activeReservations.length > 0) button.classList.add("occupied");
+    if (dayReservations.some((r) => r.status === "pago")) button.classList.add("paid");
+    if (dayReservations.some((r) => r.status === "cancelado")) button.classList.add("cancelled");
+    if (dayReservations.some((r) => (r.payments || []).some((p) => p.status === "pendente"))) button.classList.add("pending");
 
-    button.title = reservations.length
-      ? reservations.map((reservation) => `${reservation.clientName} - ${formatDateRange(reservation)}`).join("\n")
+    button.title = dayReservations.length
+      ? dayReservations.map((reservation) => `${reservation.clientName} - ${formatDateRange(reservation)}`).join("\n")
       : dateKey;
     button.addEventListener("click", () => {
       state.activeDate = parseDate(dateKey);
@@ -807,10 +831,22 @@ function initializeEmployeeMonth() {
 }
 
 async function requestJson(url, options = {}) {
+  const token = getAuthToken();
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (options.headers) Object.assign(headers, options.headers);
+
   const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers,
   });
+
+  if (response.status === 401) {
+    sessionStorage.removeItem("auth_token");
+    document.cookie = "session=; path=/; max-age=0";
+    window.location.href = "/";
+    return;
+  }
 
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json") ? await response.json() : null;
@@ -868,6 +904,15 @@ function escapeHtml(value) {
 }
 
 let toastTimeout;
+async function handleLogout() {
+  try {
+    await requestJson("/api/logout", { method: "POST" });
+  } catch {}
+  sessionStorage.removeItem("auth_token");
+  document.cookie = "session=; path=/; max-age=0";
+  window.location.href = "/";
+}
+
 function showToast(message) {
   clearTimeout(toastTimeout);
   elements.toast.textContent = message;

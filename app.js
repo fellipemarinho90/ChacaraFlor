@@ -264,16 +264,26 @@ function handleClientSearch() {
   container.innerHTML = "";
 
   if (query.length < 2) {
-    container.innerHTML = '<div class="search-empty">Digite ao menos 2 caracteres para buscar.</div>';
+    container.innerHTML = '<div class="search-empty">Digite ao menos 2 caracteres do nome ou telefone para buscar.</div>';
     return;
   }
 
-  const matches = state.reservations.filter((reservation) =>
-    reservation.clientName.toLowerCase().includes(query)
-  );
+  const queryDigits = query.replace(/\D/g, "");
+
+  const matches = state.reservations.filter((reservation) => {
+    const nameMatch = String(reservation.clientName || "").toLowerCase().includes(query);
+    if (nameMatch) return true;
+
+    if (queryDigits.length >= 2) {
+      const phoneDigits = String(reservation.phone || "").replace(/\D/g, "");
+      return phoneDigits.includes(queryDigits);
+    }
+
+    return false;
+  });
 
   if (matches.length === 0) {
-    container.innerHTML = '<div class="search-empty">Nenhuma reserva encontrada para este cliente.</div>';
+    container.innerHTML = '<div class="search-empty">Nenhuma reserva encontrada para este cliente ou telefone.</div>';
     return;
   }
 
